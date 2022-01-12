@@ -1,6 +1,9 @@
 {
   "name": "monzo-azure-functions",
   "packageManager": "yarn@3.1.1",
+  "scripts": {
+    "terraformApply": "cd terraform && terraform apply -auto-approve"
+  },
   "workspaces": [
     "packages/*"
   ]

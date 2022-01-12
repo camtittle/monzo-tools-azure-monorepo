@@ -16,6 +16,13 @@
       "collectionName": "transactions",
       "connectionStringSetting": "CosmosDbConnectionString",
       "direction": "out"
+    },
+    {
+      "type": "queue",
+      "direction": "out",
+      "name": "transactionQueueItem",
+      "queueName": "%TransactionQueueName%",
+      "connection": "StorageAccountConnectionString"
     }
   ],
   "scriptFile": "../dist/monzoWebhook.js",

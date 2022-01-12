@@ -51,10 +51,12 @@ resource "azurerm_function_app" "function_app" {
   location            = var.location
   app_service_plan_id = azurerm_app_service_plan.app_service_plan.id
   app_settings = {
-    "WEBSITE_RUN_FROM_PACKAGE"       = "",
-    "FUNCTIONS_WORKER_RUNTIME"       = "node",
-    "APPINSIGHTS_INSTRUMENTATIONKEY" = azurerm_application_insights.application_insights.instrumentation_key,
+    "WEBSITE_RUN_FROM_PACKAGE"       = ""
+    "FUNCTIONS_WORKER_RUNTIME"       = "node"
+    "APPINSIGHTS_INSTRUMENTATIONKEY" = azurerm_application_insights.application_insights.instrumentation_key
     "CosmosDbConnectionString"       = azurerm_cosmosdb_account.acc.connection_strings.0
+    "StorageAccountConnectionString" = azurerm_storage_account.storage_account.primary_connection_string
+    "TransactionQueueName"           = azurerm_storage_queue.transactions.name
   }
   os_type = "linux"
   site_config {
@@ -77,32 +79,39 @@ resource "azurerm_function_app" "function_app" {
 # Database
 
 resource "azurerm_cosmosdb_account" "acc" {
-  name                      = "${var.project}-${var.environment}-cdbacc"
-  location                  = azurerm_resource_group.resource_group.location
-  resource_group_name       = azurerm_resource_group.resource_group.name
-  offer_type                = "Standard"
-  kind                      = "GlobalDocumentDB"
+  name                = "${var.project}-${var.environment}-cdbacc"
+  location            = azurerm_resource_group.resource_group.location
+  resource_group_name = azurerm_resource_group.resource_group.name
+  offer_type          = "Standard"
+  kind                = "GlobalDocumentDB"
 
   consistency_policy {
     consistency_level = "Session"
   }
 
   geo_location {
-    location = var.location
+    location          = var.location
     failover_priority = 0
   }
 }
 
 resource "azurerm_cosmosdb_sql_database" "db" {
-  name = "monzodb"
+  name                = "monzodb"
   resource_group_name = azurerm_cosmosdb_account.acc.resource_group_name
-  account_name = azurerm_cosmosdb_account.acc.name
+  account_name        = azurerm_cosmosdb_account.acc.name
 }
 
 resource "azurerm_cosmosdb_sql_container" "transactions" {
-  name = "transactions"
-  resource_group_name = "${azurerm_cosmosdb_account.acc.resource_group_name}"
-  account_name = azurerm_cosmosdb_account.acc.name
-  database_name = azurerm_cosmosdb_sql_database.db.name
-  partition_key_path = "/accountId"
+  name                = "transactions"
+  resource_group_name = azurerm_cosmosdb_account.acc.resource_group_name
+  account_name        = azurerm_cosmosdb_account.acc.name
+  database_name       = azurerm_cosmosdb_sql_database.db.name
+  partition_key_path  = "/accountId"
+}
+
+# Queue
+
+resource "azurerm_storage_queue" "transactions" {
+  name                 = "${var.project}${var.environment}transactionsqueue"
+  storage_account_name = azurerm_storage_account.storage_account.name
 }

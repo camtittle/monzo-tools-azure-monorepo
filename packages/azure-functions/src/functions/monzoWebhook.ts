@@ -1,8 +1,10 @@
 import { AzureFunction, Context, HttpRequest } from "@azure/functions"
+import { TransactionQueueItem } from "../models/dto/transactionQueueItem";
 import { TransactionEntity } from "../models/entity/transactionEntity";
 import { isTransactionEvent, TransactionEvent } from "../models/monzo/transactionEvent";
 
 const cosmosDbBindingName = 'transactionDocument';
+const storageQueueBindingName = 'transactionQueueItem';
 
 const mapTransactionEventToEntity = (event: TransactionEvent): TransactionEntity => {
     return {
@@ -46,10 +48,17 @@ export const run: AzureFunction = async function (context: Context, req: HttpReq
         return;
     }
 
-    const transactionEntity = mapTransactionEventToEntity(event);
-
     // Outputs the entity to be saved to the CosmosDB via function output binding
+    const transactionEntity = mapTransactionEventToEntity(event);
     context.bindings[cosmosDbBindingName] = JSON.stringify(transactionEntity);
+
+    // Outputs the transaction summary to a queue
+    const transactionQueueItem: TransactionQueueItem = {
+        accountId: transactionEntity.accountId,
+        amount: transactionEntity.amount,
+        id: transactionEntity.id
+    };
+    context.bindings[storageQueueBindingName] = JSON.stringify(transactionQueueItem);
 
     context.done();
 };
