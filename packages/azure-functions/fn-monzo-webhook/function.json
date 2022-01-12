@@ -1,0 +1,23 @@
+{
+  "bindings": [
+    {
+      "authLevel": "Anonymous",
+      "type": "HttpTrigger",
+      "direction": "in",
+      "name": "req",
+      "methods": [
+        "post"
+      ]
+    },
+    {
+      "name": "transactionDocument",
+      "type": "cosmosDB",
+      "databaseName": "monzodb",
+      "collectionName": "transactions",
+      "connectionStringSetting": "CosmosDbConnectionString",
+      "direction": "out"
+    }
+  ],
+  "scriptFile": "../dist/monzoWebhook.js",
+  "entryPoint": "run"
+}
