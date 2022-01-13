@@ -1,0 +1,29 @@
+{
+  "bindings": [
+    {
+      "authLevel": "Anonymous",
+      "type": "HttpTrigger",
+      "direction": "in",
+      "name": "req",
+      "methods": [
+        "get"
+      ]
+    },
+    {
+      "type": "cosmosDB",
+      "name": "summary",
+      "databaseName": "%CosmosDbName%",
+      "collectionName": "%CosmosDbSummariesCollectionName%",
+      "connectionStringSetting": "CosmosDBConnectionString",
+      "direction": "in",
+      "Id": "{Query.accountId}",
+      "PartitionKey": "{Query.accountId}"
+    },
+    {
+      "type": "http",
+      "direction": "out",
+      "name": "res"
+    }
+  ],
+  "scriptFile": "../dist/getSummary.js"
+}
