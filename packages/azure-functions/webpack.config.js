@@ -5,7 +5,8 @@ module.exports = {
   mode: 'production',
   entry:  {
       monzoWebhook: "./src/functions/monzoWebhook.ts",
-      getWeek: "./src/functions/getWeek.ts"
+      getWeek: "./src/functions/getWeek.ts",
+      generateSummary: "./src/functions/generateSummary.ts"
   },
   module: {
     rules: [

@@ -1,21 +1,30 @@
 {
+  "disabled": false,
   "bindings": [
     {
-      "authLevel": "Anonymous",
-      "type": "HttpTrigger",
+      "type": "queueTrigger",
       "direction": "in",
-      "name": "req",
-      "methods": [
-        "get",
-        "post"
-      ]
+      "name": "transactionQueueItem",
+      "queueName": "%TransactionQueueName%",
+      "connection": "StorageAccountConnectionString"
     },
     {
-      "type": "http",
-      "direction": "out",
-      "name": "res"
+      "name": "transactions",
+      "type": "cosmosDB",
+      "direction": "in",
+      "databaseName": "%CosmosDbName%",
+      "collectionName": "%CosmosDbCollectionName%",
+      "sqlQuery": "SELECT * from c where c.accountId = {accountId}",
+      "connectionStringSetting": "CosmosDBConnectionString"
+    },
+    {
+      "name": "summaryOutput",
+      "type": "cosmosDB",
+      "databaseName": "%CosmosDbName%",
+      "collectionName": "%CosmosDbSummariesCollectionName%",
+      "connectionStringSetting": "CosmosDbConnectionString",
+      "direction": "out"
     }
   ],
-  "scriptFile": "../dist/getWeek.js",
-  "entryPoint": "banana"
+  "scriptFile": "../dist/generateSummary.js"
 }

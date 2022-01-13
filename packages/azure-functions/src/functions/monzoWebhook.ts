@@ -59,6 +59,4 @@ export const run: AzureFunction = async function (context: Context, req: HttpReq
         id: transactionEntity.id
     };
     context.bindings[storageQueueBindingName] = JSON.stringify(transactionQueueItem);
-
-    context.done();
 };

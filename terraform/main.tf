@@ -13,6 +13,12 @@ provider "azurerm" {
   features {}
 }
 
+locals {
+  cosmosdb_db_name                     = "monzodb"
+  cosmosdb_transactions_container_name = "transactions"
+  cosmosdb_summaries_container_name    = "summaries"
+}
+
 resource "azurerm_resource_group" "resource_group" {
   name     = "${var.project}-${var.environment}-rg"
   location = var.location
@@ -51,12 +57,15 @@ resource "azurerm_function_app" "function_app" {
   location            = var.location
   app_service_plan_id = azurerm_app_service_plan.app_service_plan.id
   app_settings = {
-    "WEBSITE_RUN_FROM_PACKAGE"       = ""
-    "FUNCTIONS_WORKER_RUNTIME"       = "node"
-    "APPINSIGHTS_INSTRUMENTATIONKEY" = azurerm_application_insights.application_insights.instrumentation_key
-    "CosmosDbConnectionString"       = azurerm_cosmosdb_account.acc.connection_strings.0
-    "StorageAccountConnectionString" = azurerm_storage_account.storage_account.primary_connection_string
-    "TransactionQueueName"           = azurerm_storage_queue.transactions.name
+    "WEBSITE_RUN_FROM_PACKAGE"        = ""
+    "FUNCTIONS_WORKER_RUNTIME"        = "node"
+    "APPINSIGHTS_INSTRUMENTATIONKEY"  = azurerm_application_insights.application_insights.instrumentation_key
+    "CosmosDbConnectionString"        = azurerm_cosmosdb_account.acc.connection_strings.0
+    "StorageAccountConnectionString"  = azurerm_storage_account.storage_account.primary_connection_string
+    "TransactionQueueName"            = azurerm_storage_queue.transactions.name
+    "CosmosDbName"                    = local.cosmosdb_db_name
+    "CosmosDbCollectionName"          = local.cosmosdb_transactions_container_name
+    "CosmosDbSummariesCollectionName" = local.cosmosdb_summaries_container_name
   }
   os_type = "linux"
   site_config {
@@ -93,16 +102,28 @@ resource "azurerm_cosmosdb_account" "acc" {
     location          = var.location
     failover_priority = 0
   }
+
+  capabilities {
+    name = "EnableServerless"
+  }
 }
 
 resource "azurerm_cosmosdb_sql_database" "db" {
-  name                = "monzodb"
+  name                = local.cosmosdb_db_name
   resource_group_name = azurerm_cosmosdb_account.acc.resource_group_name
   account_name        = azurerm_cosmosdb_account.acc.name
 }
 
 resource "azurerm_cosmosdb_sql_container" "transactions" {
-  name                = "transactions"
+  name                = local.cosmosdb_transactions_container_name
+  resource_group_name = azurerm_cosmosdb_account.acc.resource_group_name
+  account_name        = azurerm_cosmosdb_account.acc.name
+  database_name       = azurerm_cosmosdb_sql_database.db.name
+  partition_key_path  = "/accountId"
+}
+
+resource "azurerm_cosmosdb_sql_container" "summaries" {
+  name                = local.cosmosdb_summaries_container_name
   resource_group_name = azurerm_cosmosdb_account.acc.resource_group_name
   account_name        = azurerm_cosmosdb_account.acc.name
   database_name       = azurerm_cosmosdb_sql_database.db.name

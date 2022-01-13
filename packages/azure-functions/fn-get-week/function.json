@@ -16,6 +16,5 @@
       "name": "res"
     }
   ],
-  "scriptFile": "../dist/getWeek.js",
-  "entryPoint": "banana"
+  "scriptFile": "../dist/getWeek.js"
 }

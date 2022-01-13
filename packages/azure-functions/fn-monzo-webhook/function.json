@@ -25,6 +25,5 @@
       "connection": "StorageAccountConnectionString"
     }
   ],
-  "scriptFile": "../dist/monzoWebhook.js",
-  "entryPoint": "run"
+  "scriptFile": "../dist/monzoWebhook.js"
 }

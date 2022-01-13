@@ -1,3 +1,5 @@
+import { Merchant } from "./merchant";
+
 export interface TransactionEntity {
     accountId: string,
     amount: number,
@@ -8,22 +10,5 @@ export interface TransactionEntity {
     category: string,
     isLoad: boolean,
     settled: string,
-    merchant: {
-        address: {
-            address: string,
-            city: string,
-            country: string,
-            latitude: number,
-            longitude: number,
-            postcode: string,
-            region: string
-        },
-        created: string
-        groupId: string,
-        id: string,
-        logo: string,
-        emoji: string,
-        name: string,
-        category: string
-    }
+    merchant: Merchant
 }
